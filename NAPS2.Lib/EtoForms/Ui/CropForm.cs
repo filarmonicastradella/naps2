@@ -1,7 +1,9 @@
 using Eto.Drawing;
 using Eto.Forms;
 using NAPS2.EtoForms.Layout;
+using NAPS2.EtoForms.Widgets;
 using NAPS2.Images.Bitwise;
+using NAPS2.Scan;
 
 namespace NAPS2.EtoForms.Ui;
 
@@ -13,9 +15,11 @@ public class CropForm : UnaryImageFormBase
     private const double HANDLE_LENGTH_RATIO = 0.07;
     private const int HANDLE_MIN_LENGTH = 30;
     private const int FREEFORM_MIN_SIZE = 10;
+    private const float DEFAULT_DPI = 96;
 
     private readonly ColorScheme _colorScheme;
     private readonly Button _autoCrop = C.Button(UiStrings.AutoCrop);
+    private readonly EnumDropDownWidget<ScanPageSize> _pageSize = new(scale: false);
 
     // TODO: Textboxes for direct editing
 
@@ -33,6 +37,9 @@ public class CropForm : UnaryImageFormBase
 
     private bool _freeformAvailable;
     private bool _freeformActive;
+
+    private float _dpiX, _dpiY;
+    private bool _settingPageSize;
 
     public CropForm(Naps2Config config, UiImageList imageList, ThumbnailController thumbnailController,
         ColorScheme colorScheme, IIconProvider iconProvider) :
@@ -53,6 +60,10 @@ public class CropForm : UnaryImageFormBase
         Overlay.MouseUp += Overlay_MouseUp;
         KeyDown += CropForm_KeyDown;
         _autoCrop.Click += AutoCrop_Click;
+        _pageSize.Items = [ScanPageSize.Custom, ..EnumDropDownWidget<ScanPageSize>.DefaultItems
+            .Where(x => x.PageDimensions() != null)];
+        _pageSize.SelectedItem = ScanPageSize.Custom;
+        _pageSize.SelectedItemChanged += (_, _) => PageSizeChanged();
     }
 
     // The handle length is proportional to the window size
@@ -85,10 +96,80 @@ public class CropForm : UnaryImageFormBase
     protected override void Revert()
     {
         _cropT = _cropL = _cropB = _cropR = _realT = _realL = _realB = _realR = 0;
+        ClearPageSize();
         Overlay.Invalidate();
     }
 
+    protected override void OnFullSizeImageRendered(IMemoryImage realImage)
+    {
+        _dpiX = realImage.HorizontalResolution > 0 ? realImage.HorizontalResolution : DEFAULT_DPI;
+        _dpiY = realImage.VerticalResolution > 0 ? realImage.VerticalResolution : _dpiX;
+    }
+
+    protected override LayoutElement CreateControls()
+    {
+        return L.Column(
+            L.Row(
+                C.Label(UiStrings.PageSizeLabel).AlignCenter(),
+                _pageSize.AsControl().AlignCenter(),
+                C.Filler()
+            ),
+            ApplyToSelectedControl
+        );
+    }
+
     protected override LayoutElement CreateExtraButtons() => L.Row(base.CreateExtraButtons(), _autoCrop);
+
+    protected override ListMutation<UiImage> CreateMutation()
+    {
+        var dimens = _pageSize.SelectedItem.PageDimensions();
+        if (dimens == null)
+        {
+            return base.CreateMutation();
+        }
+        // With a paper size, the crop is calculated for each image so that pages of different sizes all end up the
+        // same size
+        var pageSize = dimens.ToPageSize();
+        float xSum = _cropL + _cropR, ySum = _cropT + _cropB;
+        return new ImageListMutation.AddTransforms(
+        [
+            new CropToSizeTransform((double) pageSize.WidthInInches, (double) pageSize.HeightInInches,
+                xSum > 0 ? _cropL / xSum : 0.5, ySum > 0 ? _cropT / ySum : 0.5)
+        ]);
+    }
+
+    // Choosing a paper size sets the crop area to that size, keeping it centered on the current crop area
+    private void PageSizeChanged()
+    {
+        if (_settingPageSize) return;
+        var dimens = _pageSize.SelectedItem.PageDimensions();
+        if (dimens == null) return;
+        var pageSize = dimens.ToPageSize();
+        var (pageWidth, pageHeight) = ((float) pageSize.WidthInInches, (float) pageSize.HeightInInches);
+        // Use the paper's orientation that matches the image
+        if ((pageWidth > pageHeight) != (RealImageWidth / _dpiX > RealImageHeight / _dpiY))
+        {
+            (pageWidth, pageHeight) = (pageHeight, pageWidth);
+        }
+        float w = Math.Min(pageWidth * _dpiX / RealImageWidth, 1);
+        float h = Math.Min(pageHeight * _dpiY / RealImageHeight, 1);
+        float centerX = (_cropL + 1 - _cropR) / 2;
+        float centerY = (_cropT + 1 - _cropB) / 2;
+        _cropL = (centerX - w / 2).Clamp(0, 1 - w);
+        _cropR = 1 - w - _cropL;
+        _cropT = (centerY - h / 2).Clamp(0, 1 - h);
+        _cropB = 1 - h - _cropT;
+        UpdateRealCoords();
+        Overlay.Invalidate();
+    }
+
+    // Resizing the crop area manually means it no longer matches a paper size
+    private void ClearPageSize()
+    {
+        _settingPageSize = true;
+        _pageSize.SelectedItem = ScanPageSize.Custom;
+        _settingPageSize = false;
+    }
 
     private void AutoCrop_Click(object? sender, EventArgs e)
     {
@@ -102,6 +183,7 @@ public class CropForm : UnaryImageFormBase
         _cropR = op.Right / (float) image.Width;
         _cropT = op.Top / (float) image.Height;
         _cropB = op.Bottom / (float) image.Height;
+        ClearPageSize();
         UpdateRealCoords();
         Overlay.Invalidate();
     }
@@ -191,6 +273,10 @@ public class CropForm : UnaryImageFormBase
         }
         if (e.Key is Keys.Up or Keys.Down or Keys.Left or Keys.Right)
         {
+            if (!moveWhole)
+            {
+                ClearPageSize();
+            }
             UpdateRealCoords();
             Overlay.Invalidate();
             e.Handled = true;
@@ -262,6 +348,10 @@ public class CropForm : UnaryImageFormBase
     private void UpdateCrop(PointF mousePos)
     {
         var delta = mousePos - _mouseOrigin;
+        if (_freeformActive || _activeHandle is not (Handle.None or Handle.Middle))
+        {
+            ClearPageSize();
+        }
         if (_freeformActive)
         {
             var origin = _mouseOrigin - new PointF(_overlayL, _overlayT);

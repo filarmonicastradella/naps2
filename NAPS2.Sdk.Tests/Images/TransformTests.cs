@@ -443,6 +443,26 @@ public class TransformTests : ContextualTests
     }
 
     [Fact]
+    public void CropToSize()
+    {
+        var first = ImageContext.Create(400, 500, ImagePixelFormat.RGB24);
+        first.SetResolution(100, 100);
+        var second = ImageContext.Create(1000, 700, ImagePixelFormat.RGB24);
+        second.SetResolution(200, 200);
+        // 3 x 4 inches
+        var transform = new CropToSizeTransform(3, 4);
+
+        first = first.PerformTransform(transform);
+        // Landscape images get a landscape page, and a dimension smaller than the page is unchanged
+        second = second.PerformTransform(transform);
+
+        Assert.Equal((300, 400), (first.Width, first.Height));
+        Assert.Equal((800, 600), (second.Width, second.Height));
+        Assert.Equal(new CropTransform(0, 100, 50, 50),
+            new CropToSizeTransform(3, 4, horizontalOffset: 0).GetCropTransform(400, 500, 100, 100));
+    }
+
+    [Fact]
     public void BlackWhite()
     {
         var original = LoadImage(ImageResources.dog);
