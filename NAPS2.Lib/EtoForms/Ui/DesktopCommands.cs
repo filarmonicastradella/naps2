@@ -148,6 +148,11 @@ public class DesktopCommands
             Text = UiStrings.Crop,
             IconName = "transform_crop"
         };
+        Pad = new ActionCommand(desktopSubFormController.ShowPadForm)
+        {
+            Text = UiStrings.ExpandPage,
+            IconName = "transform_pad"
+        };
         BrightCont = new ActionCommand(desktopSubFormController.ShowBrightnessContrastForm)
         {
             Text = UiStrings.BrightnessContrast,
@@ -416,6 +421,7 @@ public class DesktopCommands
     public ActionCommand BlackWhite { get; set; }
     public ActionCommand Sharpen { get; set; }
     public ActionCommand DocumentCorrection { get; set; }
+    public ActionCommand Pad { get; set; }
     public ActionCommand Compress { get; set; }
     public ActionCommand Split { get; set; }
     public ActionCommand Combine { get; set; }

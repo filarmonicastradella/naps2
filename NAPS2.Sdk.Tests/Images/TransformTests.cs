@@ -443,6 +443,132 @@ public class TransformTests : ContextualTests
     }
 
     [Fact]
+    public void PadNull()
+    {
+        var original = LoadImage(ImageResources.dog);
+        var expected = LoadImage(ImageResources.dog);
+
+        var transformed = original.PerformTransform(new PadTransform());
+
+        ImageAsserts.Similar(expected, transformed, ImageAsserts.NULL_RMSE_THRESHOLD);
+        AssertOwnership(original, transformed);
+    }
+
+    [Fact]
+    public void Pad()
+    {
+        var original = LoadImage(ImageResources.dog);
+        var expected = LoadImage(ImageResources.dog);
+        int width = original.Width, height = original.Height;
+
+        var transformed = original.PerformTransform(new PadTransform(10, 20, 15, 5));
+
+        Assert.Equal(width + 30, transformed.Width);
+        Assert.Equal(height + 20, transformed.Height);
+        ImageAsserts.PixelColors(transformed, new()
+        {
+            { (0, 0), (255, 255, 255) },
+            { (9, 50), (255, 255, 255) },
+            { (width + 29, height + 19), (255, 255, 255) }
+        });
+        // Cropping the margins back off gives the original image
+        var cropped = transformed.Clone().PerformTransform(new CropTransform(10, 20, 15, 5));
+        ImageAsserts.Similar(expected, cropped, ImageAsserts.NULL_RMSE_THRESHOLD);
+        AssertOwnership(original, transformed);
+    }
+
+    [Fact]
+    public void PadBlackWhite()
+    {
+        var original = LoadImage(ImageResources.dog).PerformTransform(new BlackWhiteTransform());
+        var expected = LoadImage(ImageResources.dog).PerformTransform(new BlackWhiteTransform());
+
+        // Margins that aren't whole bytes
+        var transformed = original.PerformTransform(new PadTransform(3, 7, 5, 1));
+
+        ImageAsserts.PixelColors(transformed, new()
+        {
+            { (0, 0), (255, 255, 255) },
+            { (2, 30), (255, 255, 255) }
+        });
+        var cropped = transformed.PerformTransform(new CropTransform(3, 7, 5, 1));
+        ImageAsserts.Similar(expected, cropped, ImageAsserts.NULL_RMSE_THRESHOLD);
+    }
+
+    [Fact]
+    public void PadWithDifferentOriginal()
+    {
+        var original = LoadImage(ImageResources.dog);
+        int width = original.Width, height = original.Height;
+
+        var transformed = ImageContext.PerformTransform(original,
+            new PadTransform(20, 40, 30, 10, original.Width * 2, original.Height * 2));
+
+        Assert.Equal(width + 30, transformed.Width);
+        Assert.Equal(height + 20, transformed.Height);
+    }
+
+    [Fact]
+    public void PadToSize()
+    {
+        var first = ImageContext.Create(100, 150, ImagePixelFormat.RGB24);
+        first.SetResolution(100, 100);
+        var second = ImageContext.Create(200, 120, ImagePixelFormat.RGB24);
+        second.SetResolution(200, 200);
+        // 3 x 4 inches
+        var transform = new PadToSizeTransform(3, 4);
+
+        first = first.PerformTransform(transform);
+        // Landscape images get a landscape page
+        second = second.PerformTransform(transform);
+
+        Assert.Equal((300, 400), (first.Width, first.Height));
+        Assert.Equal((800, 600), (second.Width, second.Height));
+    }
+
+    [Fact]
+    public void PadToSizeMargins()
+    {
+        var transform = new PadToSizeTransform(3, 4, horizontalOffset: 0, verticalOffset: 1);
+
+        Assert.Equal(new PadTransform(0, 200, 250, 0), transform.GetPadTransform(100, 150, 100, 100));
+        // An image larger than the page isn't shrunk, and a missing resolution is treated as 96 dpi
+        Assert.Equal(new PadTransform(0, 0, 138, 0), transform.GetPadTransform(500, 150, 0, 0));
+    }
+
+    [Fact]
+    public void CropToSize()
+    {
+        var first = ImageContext.Create(400, 500, ImagePixelFormat.RGB24);
+        first.SetResolution(100, 100);
+        var second = ImageContext.Create(1000, 700, ImagePixelFormat.RGB24);
+        second.SetResolution(200, 200);
+        // 3 x 4 inches
+        var transform = new CropToSizeTransform(3, 4);
+
+        first = first.PerformTransform(transform);
+        // Landscape images get a landscape page, and a dimension smaller than the page is unchanged
+        second = second.PerformTransform(transform);
+
+        Assert.Equal((300, 400), (first.Width, first.Height));
+        Assert.Equal((800, 600), (second.Width, second.Height));
+        Assert.Equal(new CropTransform(0, 100, 50, 50),
+            new CropToSizeTransform(3, 4, horizontalOffset: 0).GetCropTransform(400, 500, 100, 100));
+    }
+
+    [Fact]
+    public void PadSimplify()
+    {
+        var first = new PadTransform(10, 20, 15, 5, 100, 200);
+        // The second transform was made for the padded image (130 x 220), rendered at double size
+        var second = new PadTransform(4, 6, 8, 2, 260, 440);
+
+        var simplified = second.Simplify(first);
+
+        Assert.Equal(new PadTransform(12, 23, 19, 6, 100, 200), simplified);
+    }
+
+    [Fact]
     public void BlackWhite()
     {
         var original = LoadImage(ImageResources.dog);

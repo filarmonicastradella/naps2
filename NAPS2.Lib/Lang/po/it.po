@@ -1251,7 +1251,7 @@ msgstr "Porta"
 
 #: UiStrings.resx$PositionLabel$Message
 msgid "Position:"
-msgstr ""
+msgstr "Posizione:"
 
 #: UiStrings.resx$PostProcessing$Message
 msgid "Post-processing"
@@ -2021,3 +2021,27 @@ msgstr "{0} immagini salvate."
 msgid "{0} of {1}"
 msgstr "{0} di {1}"
 
+
+#: UiStrings.resx$ExpandPage$Message
+msgid "Expand"
+msgstr "Ingrandisci"
+
+#: UiStrings.resx$MarginsLabel$Message
+msgid "Margins:"
+msgstr "Margini:"
+
+#: UiStrings.resx$MarginTopLabel$Message
+msgid "Top"
+msgstr "Sopra"
+
+#: UiStrings.resx$MarginBottomLabel$Message
+msgid "Bottom"
+msgstr "Sotto"
+
+#: UiStrings.resx$MarginLeftLabel$Message
+msgid "Left"
+msgstr "Sinistra"
+
+#: UiStrings.resx$MarginRightLabel$Message
+msgid "Right"
+msgstr "Destra"

@@ -25,6 +25,7 @@ public class MacIconProvider : IIconProvider
         { "arrow_left", "arrow.left" },
         { "arrow_right", "arrow.right" },
         { "transform_crop", "crop" },
+        { "transform_pad", "arrow.up.left.and.arrow.down.right" },
         { "weather_sun", "sun.max" },
         { "contrast_with_sun", "sun.max" },
         { "color_management", "paintpalette" },

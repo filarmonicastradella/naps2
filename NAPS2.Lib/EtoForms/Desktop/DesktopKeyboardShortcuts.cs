@@ -51,6 +51,7 @@ public class DesktopKeyboardShortcuts
         _ksm.Assign(ks.ImageBrightness, commands.BrightCont);
         _ksm.Assign(ks.ImageContrast, commands.BrightCont);
         _ksm.Assign(ks.ImageCrop, commands.Crop);
+        _ksm.Assign(ks.ImagePad, commands.Pad);
         _ksm.Assign(ks.ImageHue, commands.HueSat);
         _ksm.Assign(ks.ImageSaturation, commands.HueSat);
         _ksm.Assign(ks.ImageSharpen, commands.Sharpen);

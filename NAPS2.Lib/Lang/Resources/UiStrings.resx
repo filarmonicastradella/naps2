@@ -1149,4 +1149,22 @@ If your scanner doesn't support "Duplex" scanning, follow these instructions:
   <data name="ButtonsLabel" xml:space="preserve">
     <value>Buttons:</value>
   </data>
+  <data name="ExpandPage" xml:space="preserve">
+    <value>Expand</value>
+  </data>
+  <data name="MarginsLabel" xml:space="preserve">
+    <value>Margins:</value>
+  </data>
+  <data name="MarginTopLabel" xml:space="preserve">
+    <value>Top</value>
+  </data>
+  <data name="MarginBottomLabel" xml:space="preserve">
+    <value>Bottom</value>
+  </data>
+  <data name="MarginLeftLabel" xml:space="preserve">
+    <value>Left</value>
+  </data>
+  <data name="MarginRightLabel" xml:space="preserve">
+    <value>Right</value>
+  </data>
 </root>

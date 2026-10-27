@@ -33,6 +33,7 @@ public class DesktopSubFormController : IDesktopSubFormController
     }
 
     public void ShowCropForm() => ShowImageForm<CropForm>();
+    public void ShowPadForm() => ShowImageForm<PadForm>();
     public void ShowBrightnessContrastForm() => ShowImageForm<BrightContForm>();
     public void ShowHueSaturationForm() => ShowImageForm<HueSatForm>();
     public void ShowBlackWhiteForm() => ShowImageForm<BlackWhiteForm>();

@@ -1,6 +1,7 @@
 using Eto.Forms;
 using NAPS2.EtoForms.Desktop;
 using NAPS2.EtoForms.Mac;
+using NAPS2.ImportExport;
 
 namespace NAPS2.EtoForms.Ui;
 
@@ -9,8 +10,9 @@ public class MacPreviewForm : PreviewForm
     private readonly NSSlider _zoomSlider;
 
     public MacPreviewForm(Naps2Config config, DesktopCommands desktopCommands, UiImageList imageList,
-        IIconProvider iconProvider, ColorScheme colorScheme, EditWithController editWithController) : base(config,
-        desktopCommands, imageList, iconProvider, colorScheme, editWithController)
+        IIconProvider iconProvider, ColorScheme colorScheme, EditWithController editWithController,
+        IScannedImagePrinter scannedImagePrinter) : base(config, desktopCommands, imageList, iconProvider, colorScheme,
+        editWithController, scannedImagePrinter)
     {
         _zoomSlider = new NSSlider
         {

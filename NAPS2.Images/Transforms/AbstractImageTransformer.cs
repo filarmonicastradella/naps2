@@ -34,6 +34,14 @@ internal abstract class AbstractImageTransformer<TImage> where TImage : IMemoryI
                 return PerformTransform(image, rotationTransform);
             case CropTransform cropTransform:
                 return PerformTransform(image, cropTransform);
+            case CropToSizeTransform cropToSizeTransform:
+                return PerformTransform(image, cropToSizeTransform.GetCropTransform(
+                    image.Width, image.Height, image.HorizontalResolution, image.VerticalResolution));
+            case PadTransform padTransform:
+                return PerformTransform(image, padTransform);
+            case PadToSizeTransform padToSizeTransform:
+                return PerformTransform(image, padToSizeTransform.GetPadTransform(
+                    image.Width, image.Height, image.HorizontalResolution, image.VerticalResolution));
             case ScaleTransform scaleTransform:
                 return PerformTransform(image, scaleTransform);
             case ResizeTransform resizeTransform:
@@ -184,6 +192,34 @@ internal abstract class AbstractImageTransformer<TImage> where TImage : IMemoryI
             SourceYOffset = y,
             Columns = width,
             Rows = height
+        }.Perform(image, result);
+        image.Dispose();
+
+        return (TImage) result;
+    }
+
+    protected virtual TImage PerformTransform(TImage image, PadTransform transform)
+    {
+        double xScale = image.Width / (double) (transform.OriginalWidth ?? image.Width),
+            yScale = image.Height / (double) (transform.OriginalHeight ?? image.Height);
+
+        int left = Math.Max((int) Math.Round(transform.Left * xScale), 0);
+        int right = Math.Max((int) Math.Round(transform.Right * xScale), 0);
+        int top = Math.Max((int) Math.Round(transform.Top * yScale), 0);
+        int bottom = Math.Max((int) Math.Round(transform.Bottom * yScale), 0);
+        if (left == 0 && right == 0 && top == 0 && bottom == 0)
+        {
+            return image;
+        }
+
+        var result = ImageContext.Create(image.Width + left + right, image.Height + top + bottom, image.PixelFormat);
+        result.SetResolution(image.HorizontalResolution, image.VerticalResolution);
+        result.OriginalFileFormat = image.OriginalFileFormat;
+        FillColorImageOp.White.Perform(result);
+        new CopyBitwiseImageOp
+        {
+            DestXOffset = left,
+            DestYOffset = top
         }.Perform(image, result);
         image.Dispose();
 
