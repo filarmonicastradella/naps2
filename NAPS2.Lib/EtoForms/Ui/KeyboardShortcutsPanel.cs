@@ -50,6 +50,7 @@ internal class KeyboardShortcutsPanel : SettingsPanel
         new(UiStrings.BlackAndWhite, c => c.KeyboardShortcuts.ImageBlackWhite),
         new(UiStrings.BrightnessContrast, c => c.KeyboardShortcuts.ImageBrightness),
         new(UiStrings.Crop, c => c.KeyboardShortcuts.ImageCrop),
+        new(UiStrings.ExpandPage, c => c.KeyboardShortcuts.ImagePad),
         new(UiStrings.HueSaturation, c => c.KeyboardShortcuts.ImageHue),
         new(UiStrings.Sharpen, c => c.KeyboardShortcuts.ImageSharpen),
         new(UiStrings.DocumentCorrection, c => c.KeyboardShortcuts.ImageDocumentCorrection),

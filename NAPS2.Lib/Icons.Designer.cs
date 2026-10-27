@@ -1848,6 +1848,26 @@ namespace NAPS2 {
                 return ((byte[])(obj));
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] transform_pad_16 {
+            get {
+                object obj = ResourceManager.GetObject("transform_pad_16", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] transform_pad_32 {
+            get {
+                object obj = ResourceManager.GetObject("transform_pad_32", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].

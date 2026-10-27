@@ -181,6 +181,7 @@ public static class InternalDefaults
                 ImageBrightness = "",
                 ImageContrast = "",
                 ImageCrop = "",
+                ImagePad = "",
                 ImageHue = "",
                 ImageReset = "",
                 ImageSaturation = "",

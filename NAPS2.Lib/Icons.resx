@@ -403,6 +403,12 @@
   <data name="transform_crop_16" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Icons\transform_crop_16.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="transform_pad_32" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Icons\transform_pad_32.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="transform_pad_16" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Icons\transform_pad_16.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="weather_sun_32" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Icons\weather_sun_32.png;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>

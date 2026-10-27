@@ -123,6 +123,7 @@
     <ImageBrightness></ImageBrightness>
     <ImageContrast></ImageContrast>
     <ImageCrop></ImageCrop>
+    <ImagePad></ImagePad>
     <ImageHue></ImageHue>
     <ImageSaturation></ImageSaturation>
     <ImageSharpen></ImageSharpen>

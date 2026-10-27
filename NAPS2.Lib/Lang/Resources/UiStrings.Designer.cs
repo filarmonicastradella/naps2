@@ -2066,5 +2066,41 @@ namespace NAPS2.Lang.Resources {
                 return ResourceManager.GetString("ButtonsLabel", resourceCulture);
             }
         }
+        
+        internal static string ExpandPage {
+            get {
+                return ResourceManager.GetString("ExpandPage", resourceCulture);
+            }
+        }
+        
+        internal static string MarginsLabel {
+            get {
+                return ResourceManager.GetString("MarginsLabel", resourceCulture);
+            }
+        }
+        
+        internal static string MarginTopLabel {
+            get {
+                return ResourceManager.GetString("MarginTopLabel", resourceCulture);
+            }
+        }
+        
+        internal static string MarginBottomLabel {
+            get {
+                return ResourceManager.GetString("MarginBottomLabel", resourceCulture);
+            }
+        }
+        
+        internal static string MarginLeftLabel {
+            get {
+                return ResourceManager.GetString("MarginLeftLabel", resourceCulture);
+            }
+        }
+        
+        internal static string MarginRightLabel {
+            get {
+                return ResourceManager.GetString("MarginRightLabel", resourceCulture);
+            }
+        }
     }
 }

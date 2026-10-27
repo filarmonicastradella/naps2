@@ -228,6 +228,7 @@ public class PreviewForm : EtoDialogBase
                     }
                 }, "arrow_rotate_anticlockwise"),
                 MakeToolButton(Commands.Crop),
+                MakeToolButton(Commands.Pad),
                 MakeToolButton(Commands.BrightCont),
                 MakeToolButton(Commands.HueSat),
                 MakeToolButton(Commands.BlackWhite),
@@ -372,6 +373,7 @@ public class PreviewForm : EtoDialogBase
         _previewKsm.Assign(ks.ImageBrightness, Commands.BrightCont);
         _previewKsm.Assign(ks.ImageContrast, Commands.BrightCont);
         _previewKsm.Assign(ks.ImageCrop, Commands.Crop);
+        _previewKsm.Assign(ks.ImagePad, Commands.Pad);
         _previewKsm.Assign(ks.ImageHue, Commands.HueSat);
         _previewKsm.Assign(ks.ImageSaturation, Commands.HueSat);
         _previewKsm.Assign(ks.ImageSharpen, Commands.Sharpen);
