@@ -2,6 +2,7 @@ using Eto.Drawing;
 using Eto.Forms;
 using NAPS2.EtoForms.Desktop;
 using NAPS2.EtoForms.Widgets;
+using NAPS2.ImportExport;
 
 namespace NAPS2.EtoForms.Ui;
 
@@ -11,6 +12,7 @@ public class PreviewForm : EtoDialogBase
     private readonly IIconProvider _iconProvider;
     private readonly KeyboardShortcutManager _previewKsm;
     private readonly EditWithController _editWithController;
+    private readonly IScannedImagePrinter _scannedImagePrinter;
 
     private readonly ButtonToolItem _pageNumberButton = new();
     private readonly ButtonToolItem _zoomPercentButton = new();
@@ -18,7 +20,8 @@ public class PreviewForm : EtoDialogBase
     private UiImage? _currentImage;
 
     public PreviewForm(Naps2Config config, DesktopCommands desktopCommands, UiImageList imageList,
-        IIconProvider iconProvider, ColorScheme colorScheme, EditWithController editWithController) : base(config)
+        IIconProvider iconProvider, ColorScheme colorScheme, EditWithController editWithController,
+        IScannedImagePrinter scannedImagePrinter) : base(config)
     {
         Title = UiStrings.PreviewFormTitle;
         Icon = EtoPlatform.Current.IsGtk ? new Icon(1f, Icons.scanner_128.ToEtoImage()) : Icons.favicon.ToEtoIcon();
@@ -28,6 +31,7 @@ public class PreviewForm : EtoDialogBase
         ImageList = imageList;
         _iconProvider = iconProvider;
         _editWithController = editWithController;
+        _scannedImagePrinter = scannedImagePrinter;
 
         ImageViewer.ColorScheme = colorScheme;
         ImageViewer.ZoomChanged += ImageViewerZoomChanged;
@@ -69,6 +73,11 @@ public class PreviewForm : EtoDialogBase
         {
             Text = UiStrings.Delete,
             IconName = "cross"
+        };
+        PrintCurrentImageCommand = new ActionCommand(PrintCurrentImage)
+        {
+            Text = UiStrings.Print,
+            IconName = "printer"
         };
 
         _previewKsm = new KeyboardShortcutManager();
@@ -142,6 +151,7 @@ public class PreviewForm : EtoDialogBase
 
     protected DesktopCommands Commands { get; set; } = null!;
     protected ActionCommand DeleteCurrentImageCommand { get; }
+    protected ActionCommand PrintCurrentImageCommand { get; }
     protected ActionCommand GoToPrevCommand { get; }
     protected ActionCommand GoToNextCommand { get; }
     protected ActionCommand ZoomInCommand { get; }
@@ -242,6 +252,7 @@ public class PreviewForm : EtoDialogBase
                 new SeparatorToolItem(),
                 MakeToolButton(Commands.SaveSelectedPdf, "file_extension_pdf"),
                 MakeToolButton(Commands.SaveSelectedImages, "picture"),
+                MakeToolButton(PrintCurrentImageCommand),
                 new SeparatorToolItem(),
                 MakeToolButton(DeleteCurrentImageCommand),
             }
@@ -253,6 +264,10 @@ public class PreviewForm : EtoDialogBase
         if (Config.Get(c => c.HiddenButtons).HasFlag(ToolbarButtons.SaveImages))
         {
             ToolBar.Items.Remove(ToolBar.Items.Single(x => x.Command == Commands.SaveSelectedImages));
+        }
+        if (!PlatformCompat.System.CanPrint || Config.Get(c => c.HiddenButtons).HasFlag(ToolbarButtons.Print))
+        {
+            ToolBar.Items.Remove(ToolBar.Items.Single(x => x.Command == PrintCurrentImageCommand));
         }
     }
 
@@ -333,6 +348,16 @@ public class PreviewForm : EtoDialogBase
         }
     }
 
+    private async Task PrintCurrentImage()
+    {
+        var state = ImageList.CurrentState;
+        using var image = CurrentImage.GetClonedImage();
+        if (await _scannedImagePrinter.PromptToPrint(this, [image], []))
+        {
+            ImageList.MarkSaved(state, [image]);
+        }
+    }
+
     private void DeleteCurrentImage()
     {
         if (MessageBox.Show(this,
@@ -386,6 +411,11 @@ public class PreviewForm : EtoDialogBase
         _previewKsm.Assign(ks.RotateFlip, Commands.Flip);
         _previewKsm.Assign(ks.RotateLeft, Commands.RotateLeft);
         _previewKsm.Assign(ks.RotateRight, Commands.RotateRight);
+
+        if (PlatformCompat.System.CanPrint)
+        {
+            _previewKsm.Assign(ks.Print, PrintCurrentImageCommand);
+        }
 
         if (PlatformCompat.System.CombinedPdfAndImageSaving)
         {
